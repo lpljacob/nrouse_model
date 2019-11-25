@@ -40,9 +40,9 @@ storage_memb_matrix = zeros(2,max_timepoints,4);
 storage_resources_matrix = zeros(2,max_timepoints,4);
 storage_output_matrix = zeros(2,max_timepoints,4);
 
-perceptual = zeros(1,max_timepoints+50,8);
-memory = zeros(1,max_timepoints+250,8);
-residual = nan(1,8);
+perceptual = zeros(1,max_timepoints+50,8); % P100/N170 predictions
+memory = zeros(1,max_timepoints+250,8); % N400 predictions
+residual = nan(1,8); % response-locked ERP predictions
 
 save_output = zeros(1,max_timepoints,8);
 save_resources = zeros(1,max_timepoints,8);
@@ -200,4 +200,4 @@ for i = 1:8
   
 end
 
-memory_contam = memory(:,1:end-250,:) + 0.3 .* perceptual(:,1:end-50,:);
+memory_contam = memory(:,1:end-250,:) + 0.3 .* perceptual(:,1:end-50,:); % N400 predictions with contamination from P100/N170
