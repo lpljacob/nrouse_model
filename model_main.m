@@ -8,7 +8,7 @@ TargetDur = 70;
 MaskDur = 500 - TargetDur;
 TestDur = 700;
 
-feedback = 0.25;
+feedback = 0.25; % strength of feedback from lexicosemantic layer to orthographic layer
 
 % visual feature nodes coding
 f_prime = 1;
@@ -16,7 +16,7 @@ f_target = 2;
 f_mask = 3;
 f_foil = 4; % only present when test word is different from target word
 
-% weight matrices
+% weight matrices connecting visual features layer to orthographic layer
 feat_to_letter = [0,0;  % prime - varies by condition
                   1,0;  % target
                   0,0;  % mask
@@ -40,12 +40,6 @@ storage_memb_matrix = zeros(2,max_timepoints,4);
 storage_resources_matrix = zeros(2,max_timepoints,4);
 storage_output_matrix = zeros(2,max_timepoints,4);
 
-LinTypes = {'-k', '--r', '-k', '--r', '-r', '--k', '-r', '--k'};
-conditionsNames = {'A-A-A','A-B-A',...
-                        'AA-A-A','AA-B-A',...
-                        'A-B-B', 'A-A-B',...
-                        'AA-B-B','AA-A-B'};
-                    
 perceptual = zeros(1,max_timepoints+50,8);
 memory = zeros(1,max_timepoints+250,8);
 residual = nan(1,8);
@@ -53,6 +47,13 @@ residual = nan(1,8);
 save_output = zeros(1,max_timepoints,8);
 save_resources = zeros(1,max_timepoints,8);
 
+
+LinTypes = {'-k', '--r', '-k', '--r', '-r', '--k', '-r', '--k'};
+conditionsNames = {'A-A-A','A-B-A',...
+                        'AA-A-A','AA-B-A',...
+                        'A-B-B', 'A-A-B',...
+                        'AA-B-B','AA-A-B'};
+                    
 %--------------------------------------------------------------------------
 %                            Simulation loop
 %--------------------------------------------------------------------------
@@ -200,194 +201,3 @@ for i = 1:8
 end
 
 memory_contam = memory(:,1:end-250,:) + 0.3 .* perceptual(:,1:end-50,:);
-
- % ------------------- PLOT FIGURES ------------------- %
-
- figure1 = figure; 
-
-%     subplot(2,1,1);
-    title('Perceptual ERP predictions (short prime');
-    for i = [1,2,5,6]
-        plot(perceptual(:,1:end-50,i),LinTypes{i},'LineWidth', 1.5,'DisplayName',conditionsNames{i});
-        line([350 350], get(gca, 'ylim'));
-        line([400 400], get(gca, 'ylim'));
-        line([900 900], get(gca, 'ylim'));
-        hold on
-    end
-    hold on
-    
-    subplot(2,1,2);
-    title('Perceptual ERP predictions (long prime');
-    for i = [3,4,7,8]
-        plot(perceptual(:,1:end-50,i),LinTypes{i},'LineWidth', 1.5,'DisplayName',conditionsNames{i});
-        line([400 400], get(gca, 'ylim'));
-        line([900 900], get(gca, 'ylim'));
-        hold on
-    end
-    hold on
-    
-    
-    
-    
-    
-figure(2);
-
-    subplot(2,1,1);
-    title('N400 ERP predictions (short prime');
-    for i = [1,2,5,6]
-        plot(memory(:,1:end-250,i),LinTypes{i},'LineWidth', 1.5,'DisplayName',conditionsNames{i});
-        line([350 350], get(gca, 'ylim'));
-        line([400 400], get(gca, 'ylim'));
-        line([900 900], get(gca, 'ylim'));
-        hold on
-    end
-    hold on
-    
-    subplot(2,1,2);
-    title('N400 ERP predictions (long prime');
-    for i = [3,4,7,8]
-        plot(memory(:,1:end-250,i),LinTypes{i},'LineWidth', 1.5,'DisplayName',conditionsNames{i});
-        line([400 400], get(gca, 'ylim'));
-        line([900 900], get(gca, 'ylim'));
-        hold on
-    end
-    hold on
- 
-leg = legend('show');
-leg.FontSize = 12;
-
-hold off
-
-modelp100s = reshape(perceptual(:,1:end-150,[5,2,1,6]), 1500, 4);
-modelp100l = reshape(perceptual(:,1:end-150,[7,4,3,8]), 1500, 4);
-
-meanshort = mean(modelp100s,2);
-meanlong = mean(modelp100l,2);
-
-mp100s = modelp100s-meanshort;
-mp100l = modelp100l-meanlong;
-
-waveforms_plotting('short', mp100s, 'model', 'P100/N170 effects predictions, short prime duration', [-0.15 0.15])
-waveforms_plotting2('short', meanshort, 'model', 'average P100/N170 predictions, short prime duration', [-0.4 0.4])
-waveforms_plotting('long', mp100l, 'model', 'P100/N170 effects predictions, long prime duration', [-0.15 0.15])
-waveforms_plotting2('long', meanlong, 'model', 'average P100/N170 predictions, long prime duration', [-0.4 0.4])
-
-modeln400s = reshape(memory_contam(:,1:end-100,[5,2,1,6]), 1500, 4);
-modeln400l = reshape(memory_contam(:,1:end-100,[7,4,3,8]), 1500, 4);
-
-meanshort = mean(modeln400s,2);
-meanlong = mean(modeln400l,2);
-
-mn400s = modeln400s-meanshort;
-mn400l = modeln400l-meanlong;
-
-waveforms_plotting('short', mn400s, 'model', 'N400 effects predictions, short prime duration', [-0.2 0.2])
-waveforms_plotting2('short', meanshort, 'model', 'average N400 predictions, short prime duration')
-waveforms_plotting('long', mn400l, 'model', 'N400 effects predictions, long prime duration', [-0.2 0.2])
-waveforms_plotting2('long', meanlong, 'model', 'average N400 predictions, long prime duration')
-
-
-datan400s = n400(1:1500, [5,2,1,6]);
-datan400l = n400(1:1500, [7,4,3,8]);
-meanshort = mean(datan400s,2);
-meanlong = mean(datan400l,2);
-
-n400s = datan400s-meanshort;
-n400l = datan400l-meanlong;
-
-waveforms_plotting2('short', meanshort, 'data', 'average N400, short prime duration', [-1.6 1.3])
-waveforms_plotting('short', n400s, 'data', 'N400 effects, short prime duration', [-1.6 1.3])
-waveforms_plotting2('long', meanlong, 'data', 'average N400, long prime duration', [-1.6 1.3])
-waveforms_plotting('long', n400l, 'data', 'N400 effects, long prime duration', [-1.6 1.3])
-
-datap100s = reshape(tmp(:,1:1500, [6,2,1,5]), 1500, 4);
-datap100l = reshape(tmp(:,1:1500, [8,4,3,7]), 1500, 4);
-meanshort = mean(datap100s,2);
-meanlong = mean(datap100l,2);
-
-p100s = datap100s-meanshort;
-p100l = datap100l-meanlong;
-
-waveforms_plotting2('short', meanshort, 'data', 'average P100/N170, short prime duration', [-4 6])
-waveforms_plotting('short', p100s, 'data', 'P100/N170 effects, short prime duration', [-1.1 1])
-waveforms_plotting2('long', meanlong, 'data', 'average P100/N170, long prime duration', [-4 6])
-waveforms_plotting('long', p100l, 'data', 'P100/N170 effects, long prime duration', [-1.1 1])
-
-% activation and resources
-
-outres = save_output(:,1:end-100,:);
-outres = [outres; save_resources(:,1:end-100,:)];
-
-titles = {'A-A-A';'A-B-A';'AA-A-A';'AA-B-A';'A-B-B';'A-A-B';'AA-B-B';'AA-A-B'};
-
-figure1 = figure;
-for i=1:8
-    tmp = 'long';
-    if ismember(i,[1 , 2 , 5 , 6]);
-        tmp = 'short';
-    end
-    waveforms_plotting3(tmp, outres(:,:,i)', 'node', titles{i}, i)
-end
-
-
-figure1 = figure;
-tmp = [zeros(350,4); reshape(sum(letter_output_matrix(:,1:end-primeonset-450,[5,2,1,6]),1), 1150, 4)];
-waveforms_subplotting('short', tmp, 'layer', 'Visual objects layer output, short prime duration', 5, 3)
-waveforms_subplotting('long', reshape(sum(letter_output_matrix(:,1:end-primeonset-100,[7,4,3,8]),1), 1500, 4), 'layer', 'Visual objects layer output, long prime duration', 6,3)
-
-waveforms_subplotting('short', [zeros(350,4); reshape(sum(word_output_matrix(:,1:end-primeonset-450,[5,2,1,6]),1), 1150, 4)], 'layer', 'Lexical entries layer output, short prime duration', 3,3)
-waveforms_subplotting('long', reshape(sum(word_output_matrix(:,1:end-primeonset-100,[7,4,3,8]),1), 1500, 4), 'layer', 'Lexical entries layer output, long prime duration',4,3)
-
-waveforms_subplotting('short', [zeros(350,4); reshape(sum(storage_output_matrix(:,1:end-primeonset-450,[5,2,1,6]),1), 1150, 4)], 'layer', 'Maintained semantics layer output, short prime duration',1,3)
-waveforms_subplotting('long', reshape(sum(storage_output_matrix(:,1:end-primeonset-100,[7,4,3,8]),1), 1500, 4), 'layer', 'Maintained semantics layer output, long prime duration',2,3)
-
-
-% test
-j=1;
-for i=[1,2,5,6,3,4,7,8]
-    minlistmem(j) = min(memory(:, end-650:end, i));
-    perceptlist(j) = max(perceptual(:, 1000:end, i)) - min(perceptual(:, 1000:end, i));
-    j = j+1;
-end
-minlistmem
-perceptlist
-
-for i=1:4
-    j = (i-1)*2+1;
-    priming_dur(i) = mean(perceptlist(j:j+1));
-end
-priming_dur
-
-minlistmem = zeros(8,1);
-j=1
-for i=[1,2,5,6,3,4,7,8]
-    minlistmem(j) = min(memory_contam(:, end-400:end, i));
-%     minlistmem(j) = mean(memory_contam(:, end-400:end, i));
-    j = j+1;
-end
-minlistmem
-
-% n400 target
-j=1;
-for i=[2,1,4,3]
-    if i == 2 || i == 4
-        [m, ind] = min(memory(:, :, i));
-        minlist(j) = m;
-    else
-        minlist(j) = memory(:, ind, i);
-    end
-    j = j+1;
-end
-minlist([2 1 4 3])
-
-
-
-
-
-
-
-
-
-
-
-    
